@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Advanced Directive</title>
+	<script src="../lib/js/vue-2.0.js"></script>
+	<script src="../lib/js/jquery-2.1.4.js"></script>
+</head>
+<body>
+	<h4>Deep,twoWay and literal</h4>
+	<p>
+		Deep, 监测对象 Object 的变化。
+		twoWay, 回写数据 。
+		literal 增加 modifiers.
+		Deep 怎么不起作用那？？？
+	</p>
+	<div id="demo">
+		<div v-flash="options">
+			{{msg}}
+		</div>
+		<button @click="toggle">Flash</button>
+	</div>
+	<script>
+		$.fx.speeds.tortoise = 5000
+		$.fn.flash = function (speed, easing, callback) {
+			$this = $(this)
+			return $this.slideDown('tortoise', function () {
+				$this.delay(2000).slideUp(2000)
+			})
+		}
+		new Vue({
+			el: '#demo',
+			data: {
+				msg: `
+					Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.
+				`,
+				options: {
+					toggleFlash: true,
+					speed: 2000
+				},
+				show: true
+			},
+			methods: {
+				toggle () {
+					console.log('toggle flash!')
+					this.options.toggleFlash = !this.options.toggleFlash
+					this.show = !this.show
+				}
+			},
+			directives: {
+				flash: {
+					deep: true,
+					bind () {
+						console.log('Flash demo bind.')
+					},
+					update (el, vm) {
+						console.log('Update..')
+						let $el = $(el)
+						$el.flash()
+					}
+				}
+			}
+		})
+	</script>
+</body>
+</html>
