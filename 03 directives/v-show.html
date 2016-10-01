@@ -110,7 +110,7 @@
 					bind () {
 						console.log('Flash demo bind.')
 					},
-					update (el, vm) {
+					update (el:any, { value, oldValue }) {
 						let $el = $(el)
 						$el.flash()
 					},
@@ -141,7 +141,7 @@
 				 */
 				flash2: (function () {
 					var $el, update, bind, unbind
-					bind = function (el, vm) {
+					bind = function (el: any, { value, oldValue }) {
 						console.log('Flash2 bind.')
 						$el = $(el)
 						update ()
