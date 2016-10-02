@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Form contorls Base Usage and value bind</title>
+	<script src="../lib/js/vue-2.0.js"></script>
+</head>
+<body>
+<div id="app">
+	<h4>基本用法</h4>
+	<h5>Text</h5>
+	<label>Name:<input type="text" v-model="name" placeholder="..."></label>
+	 <p>Name:{{name}}</p>
+	 <h5>Checkbox</h5>
+	 <label>Advanced:<input type="checkbox" v-model="checked"></label>
+	 <p>Advanced: {{checked}} </p>
+	 <fieldset>
+	 	<legend>Hobbies</legend>
+	 	<label>Soccer<input type="checkbox" v-model="hobbies" value="soccer"></label>
+	 	<label>Basketball<input type="checkbox" v-model="hobbies" value="basketball"></label>
+	 	<label>Swimming<input type="checkbox" v-model="hobbies" value="swimming"></label>
+	 </fieldset>
+	 <p>Hobbies: {{hobbies}}</p>
+	 <h5>Radio</h5>
+		Gender: 
+		<label>Male<input type="radio" v-model="gender" value="male"></label>
+		<label>Female<input type="radio" v-model="gender" value="female"></label>
+		<p>Gender: {{gender}}</p>   
+		<h5>Select</h5>
+		<label for="color">Color:</label>
+		<select id="color" v-model="color">
+			<option value="red">Red</option>
+			<option value="cornsilk">Cornsilk</option>
+			<option value="deepskyblue">Beepskyblue</option>
+		</select>
+		<p>Color: {{color}}</p>
+		<label for="colours">Colours:</label>
+		<select id="colours" v-model="colours" multiple="multiple">
+			<option value="red">Red</option>
+			<option value="cornsilk">Cornsilk</option>
+			<option value="deepskyblue">Beepskyblue</option>
+		</select>
+		<p>Colours:{{colours}}</p>
+		<h4> 值绑定 </h4>
+		<p>通过 v-bind 来代替直接使用 value 属性，我们还可以绑定非字符串的值，如数值、对象、数组等。</p>
+		<fieldset>
+			<legend>v-hobbies v-bind :value</legend>
+			<label>Soccer<input type="checkbox" v-model="vhobbies" :value="soccer"></label>
+			<label>Basketball<input type="checkbox" v-model="vhobbies" :value="basketball"></label>
+			<label>Swimming<input type="checkbox" v-model="vhobbies" :value="swimming"></label>
+		</fieldset>
+		<p>v-hobbies:{{vhobbies}}</p>
+</div>
+<script>
+	new Vue({
+		el: '#app',
+		data: {
+			name: '',
+			checked: false,
+			hobbies: ['soccer'],
+			gender: 'male',
+			color: 'red',
+			colours: ['red'],
+			vhobbies: [{name: 'swimming', score: 9}],
+			soccer: {name: 'soccer', score: 10},
+			basketball: {name: 'basketball', score: 9},
+			swimming: {name: 'swimming', score: 9}
+		}
+	})
+</script>	
+</body>
+</html>
