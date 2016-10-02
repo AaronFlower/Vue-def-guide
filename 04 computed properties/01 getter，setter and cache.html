@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Computed Properties</title>
+	<script src="../lib/js/vue-2.0.js"></script>
+</head>
+<body>
+	<div id="app">
+		<h3>Computed properties with setter function</h3>
+		<label>First Name:<input v-model="first" type="text" />	</label>
+		<label>Last Name:<input v-model="last" type="text" /></label>
+		<button @click="reset">Reset Aaron Flower</button>
+		<p>{{fullName}}</p>
+		<hr />
+		<h3>Computed properties</h3>
+		<label><input v-model="price" type="text" /></label>
+		<button @click="multiple">Price x 10</button>
+		<p>{{commaPrice}}</p>
+		<h3>Cached Computed properties</h3>
+		<button @click="welcome">Get Welcome Msg</button>
+		<p id="msg">{{welcomeMsg}}</p>
+	</div>
+	<script>
+		new Vue({
+			el: '#app',
+			data: {
+				first: 'A',
+				last: 'F',
+				price: '',
+				msg: 'Aaron Flower'
+			},
+			methods: {
+				multiple () {
+					this.price *= 10 
+				},
+				reset () {
+					this.fullName = 'Aaron Flower'
+				},
+				welcome () {
+					document.getElementById('msg').innerHTML = this.welcomeMsg
+				}
+			},
+			computed: {
+				commaPrice () {
+						return (+this.price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+				},
+				fullName: {
+					get () {
+						return this.first + ' ' + this.last
+					},
+					set (val) {
+						var names = val.split(' ')
+						this.first = names[0]
+						this.last = names[1] 
+					}
+				},
+				welcomeMsg: {
+					cache: false, // 关闭缓存。每当重新读取 welcomeMsg 时，都会重新执行 getter 方法。
+					get () {
+						return 'Welcome ' + this.msg + '('+ Date.now() +')'
+					}
+				}
+			}
+		})
+	</script>
+</body>
+</html>
