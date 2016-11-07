@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Slots</title>
+	<script src="../lib/js/vue-1.0.js"></script>
+</head>
+<body>
+	<div id="app">
+		<h1>Anonymouse Slot</h1>
+		<my-component>
+		  <p>This is some original content</p>
+		  <p>This is some more original content</p>
+		</my-component>
+		<my-component>
+			<foo></foo>
+		</my-component>
+		<my-component></my-component>
+		<h1>Named Slots</h1>
+		<my-artical>
+			<!-- <p>Kidd</p> -->
+			<h3 slot="footer">Hello Footer</h3>
+			<h3 slot="header">Hello Header</h3>
+		</my-artical>
+		<h1>Anchor Header</h1>
+		<anchor-header :level="1">Hello Anchor H1</anchor-header>
+		<anchor-header :level="3">Hello Anchor H3</anchor-header>
+	</div>
+	<script>
+		var Foo = Vue.component('foo', {
+			template: '<div class="component">Foo</div>'
+		})		
+		var Bar = Vue.component('bar', {
+			template: '<div class="component">Bar</div>'
+		})
+		var AnchorHeader = Vue.component('anchor-header', {
+			template: `
+				<div>
+					<h1 v-if="level === 1">
+						<slot></slot>
+					</h1>
+					<h2 v-if="level === 2">
+						<slot></slot>
+					</h2>
+					<h3 v-if="level === 3">
+						<slot></slot>
+					</h3>
+					<h4 v-if="level === 4">
+						<slot></slot>
+					</h4>
+					<h5 v-if="level === 5">
+						<slot></slot>
+					</h5>
+					<h6 v-if="level === 6">
+						<slot></slot>
+					</h6>
+				</div>
+			`,
+			props: {
+				level: {
+					type: Number,
+					required: true
+				}
+			}
+		})
+
+		var Artical = Vue.component('my-artical', {
+			template: `
+				<header>
+					<slot name="header"></slot>
+				</header>
+				<main>
+					<slot>Medium Content!</slot>
+				</main>
+				<footer>
+					<slot name="footer"></slot1>
+				</footer>
+			`
+		})
+
+		var vm = new Vue({
+			el: '#app',
+			components: {
+				'my-component': {
+					template: `
+									<div>
+										<h3>This is my component!</h3>
+										<slot>
+											如果没有分发内容则显示我。
+										</slot>
+									</div>
+								`
+				},
+				'foo': Foo,
+				'bar': Bar,
+				'my-artical': Artical,
+				'anchor-header': AnchorHeader
+			}
+		})
+	</script>
+</body>
+</html>
