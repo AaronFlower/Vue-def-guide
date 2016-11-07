@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Reactivity In Depth</title>
+	<style>
+		.switch {
+
+		}
+	</style>
+	<script src="../lib/js/vue-2.0.js"></script>
+	<script>
+		var vm = null
+		var onload = function () {
+			vm = new Vue({
+				el: '#app',
+				data: {
+					a: 1,
+					nested: {
+						b: 'nested object'
+					},
+					msg: 'Hello Msg'
+				},
+				methods: {
+					addMember: function () {
+						this.$set(this.nested, 'iSet', 'Use instance $set to add member')
+					},
+					refreshObject: function () {
+						this.nested = Object.assign({}, this.nested, {1: 'number1', 2: 'number2'})
+					}
+				}
+			})
+			document.getElementById('vue-set').addEventListener('click', function () {
+				console.log('Kiid')
+				Vue.set(vm.nested, 'globalSet', 'Use global set to add member')
+			})
+			console.log('init...')
+		}
+		window.onload = onload
+		</script>
+	</head>
+<body>
+	<h4>Reactivity In Depth 01</h4>
+	<div id="app">
+		<ul>
+			<li>msg:{{msg}}</li>
+			<li>{{a}}</li>
+			<li>{{nested}}</li>
+		</ul>
+		<button id="vue-set">Vue.set</button>
+		<button id="instance-set" @click="addMember">instance.$set</button>
+		<button id="fresh-object" @click="refreshObject">fresh Object</button>
+	</div>
+	<h4>Reactivity In Depth 02</h4>
+	<h5>Test vm instance $vm.nextTick() method</h5>
+	<div id="app01">
+		{{msg}}
+		<button class="switch">Switch</button>
+		<button id="update-msg" @click="updateMsg">this.$nextTick()</button>
+	</div>
+	<script>	
+		var vm02 = new Vue({
+			el: '#app01', 
+			data: {
+				msg: 'Hello Msg'
+			},
+			methods: {
+				updateMsg: function () {
+					this.msg = 'Update!'
+					console.log(this.msg)
+					console.log(this.$el.textContent)
+					// this.$nextTick(function () {
+					// 	console.log(this.msg)
+					// 	console.log(this.$el.textContent)
+					// })
+				}
+			}
+		})
+	</script>
+</body>
+</html>
