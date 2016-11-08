@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Simul Broadcast Dispatch 2.0</title>
+	<script  src="../lib/js/vue-2.0.js"></script>
+</head>
+<body>
+	<div id="app">
+		<input type="text" v-model="newTodo" @keyup.enter="addNewTodo">
+		<h3>Todo List 1</h3>
+		<todo-list></todo-list>
+		<h3>Todo List 2</h3>
+		<todo-list></todo-list>
+	</div>
+	<script>
+		var eventHub = new Vue()
+		var todoList = Vue.extend({
+			data: function () {
+				return {
+					todos: [{
+						text: 'Add some todos'
+					}]
+				}
+			},
+			template: `
+				<ul>
+					<ul v-for="(todo, $index) in todos">
+						<span>{{todo.text}}</span>
+						<button @click="removeTodo($index)">&times;</button>
+						<button @click="moveToCommon($index)">Move to Common</button>
+					</ul>
+				</ul>
+			`,
+			methods: {
+				removeTodo: function ($index) {
+					this.todos.splice($index, 1)
+				},
+				addTodo: function (newTodo) {
+					this.todos.push({text: newTodo})
+				},
+				/**
+				 * dispatch msg to parent
+				 */
+				moveToCommon: function ($index) {
+					eventHub.$emit('move-to-common', this.todos[$index])
+				}
+			},
+			created: function () {
+				eventHub.$on('add-todo', this.addTodo)
+			}
+		})
+		var vm = new Vue({
+			el: '#app',
+			components: {
+				todoList: todoList
+			},
+			data: function () {
+				return {
+					newTodo: ''
+				}
+			},
+			methods: {
+				/**
+				 * broadcast to childs
+				 */
+				addNewTodo: function () {
+					if (this.newTodo) {
+						eventHub.$emit('add-todo', this.newTodo)
+					}
+					this.newTodo = ''
+				},
+				moveToCommon: function (todo) {
+					this.newTodo = todo.text
+				}
+			},
+			created: function () {
+				eventHub.$on('move-to-common', this.moveToCommon)
+			}
+		})
+	</script>
+</body>
+</html>
