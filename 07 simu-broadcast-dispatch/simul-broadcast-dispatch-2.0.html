@@ -4,14 +4,23 @@
 	<meta charset="UTF-8">
 	<title>Simul Broadcast Dispatch 2.0</title>
 	<script  src="../lib/js/vue-2.0.js"></script>
+	<style>
+		.todo-component	{
+			background: cornsilk;
+			border: solid 1px crimson;
+			margin: 20px auto;
+		}
+	</style>
 </head>
 <body>
+	<h2>Simul dispatch and broadcast with Vue eventHub</h2>
+	<p>
+		用 Vue 全局 event 事件并不能完全实现 dispatch 和 broadcast 功能。
+		因为当组件有多个实例时，通信其实是对所有实例通信的。而不是真正的父子关系通信。	
+	</p>
 	<div id="app">
-		<input type="text" v-model="newTodo" @keyup.enter="addNewTodo">
-		<h3>Todo List 1</h3>
-		<todo-list></todo-list>
-		<h3>Todo List 2</h3>
-		<todo-list></todo-list>
+		<todo-component></todo-component>
+		<todo-component></todo-component>
 	</div>
 	<script>
 		var eventHub = new Vue()
@@ -50,8 +59,16 @@
 				eventHub.$on('add-todo', this.addTodo)
 			}
 		})
-		var vm = new Vue({
-			el: '#app',
+		var todoComponent = Vue.extend({
+			template: `
+				<div class="todo-component">
+					<label>Add New Todo<input type="text" v-model="newTodo" @keyup.enter="addNewTodo"></label>
+					<h3>Todo List 1</h3>
+					<todo-list></todo-list>
+					<h3>Todo List 2</h3>
+					<todo-list></todo-list>
+				</div>
+			`,
 			components: {
 				todoList: todoList
 			},
@@ -76,6 +93,16 @@
 			},
 			created: function () {
 				eventHub.$on('move-to-common', this.moveToCommon)
+			}
+		})
+		/**
+		 * 用 Vue 全局 event 事件并不能完全实现 dispatch 和 broadcast 功能。
+		 * 因为当组件有多个实例时，通信其实是对所有实例通信的。而不是真正的父子关系通信。
+		 */
+		var vm = new Vue({
+			el: '#app',
+			components: {
+				todoComponent
 			}
 		})
 	</script>
