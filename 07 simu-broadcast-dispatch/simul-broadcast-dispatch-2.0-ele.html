@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Simul Broadcast Dispatch 1.0</title>
+	<script  src="../lib/js/vue-1.0.js"></script>
+	<style>
+		.component	{
+			background: cornsilk;
+			margin: 20px auto;
+			padding: 20px;
+		}
+	</style>
+</head>
+<body>
+	<h2>Simul dispatch and broadcast</h2>
+	<div id="app">
+		<form-legend></form-legend>
+	</div>
+	<script>
+		/**
+		 * 最内层子组件。inner-form-legend
+		 */
+		var innerFormLegend = Vue.extend({
+			componentName: 'inner-form-legend',
+			template: `
+				<div class="component">
+					<fieldset>
+						<legend>Inner Component</legend>
+						<p>Full Name: {{fullName}}</p>
+						<label>Last Name<input type="text" v-model="name" /></label>
+						<button @click="dispatchName">Dispatch</button>
+						<button>Broadcast</button>
+					</fieldset>
+				</div>
+			`,
+			data: function () {
+				return {
+					name: '',
+					fullName: ''
+				}
+			},
+			methods: {
+				/**
+				 * dispatch 的实现方式也就是用沿父链依次添加 $emit 方法。
+				 * @param  string	 eventName 
+				 * @param  string args
+				 */
+				dispatch: function (eventName, args) {
+					let parent = this.$parent
+					while (parent) {
+						parent.$emit.apply(parent, [eventName].concat(args))
+						parent = parent.$parent
+					}
+				},
+				dispatchName: function () {
+					if (this.name) {
+						this.$emit('add-inner-name', this.name)
+						this.dispatch('add-inner-name', this.name)
+					}
+				}
+			},
+			created: function () {
+				// 自身 $emit 的事件，也可以自身来监听。
+				this.$on('add-inner-name', function (name) {
+					console.log('add-inner-name:', name)
+				}),
+				this.$on('add-outer-name', function (outerName) {
+					this.fullName = outerName + ' ' + this.name
+				})
+			}
+		})
+		/**
+		 * midFormLegend
+		 */
+		var midFormLegend = Vue.extend({
+			componentName: 'mid-form-legend',
+			components: {
+				innerFormLegend: innerFormLegend
+			},
+			template: `
+				<div class="component">
+					<fieldset>
+						<legend>Middle Component</legend>
+						<p>Full Name: {{fullName}}</p>
+						<label>Mid Name<input v-model="name" type="text" /></label>
+						<button>Dispatch</button>
+						<button>Broadcast</button>
+						<inner-form-legend></inner-form-legend>
+					</fieldset>
+				</div>
+			`,
+			data: function () {
+				return {
+					name: '',
+					fullName: ''
+				}
+			},
+			methods: {
+				addInnerName: function (innerName) {
+					console.log('addInnerName:')
+					this.fullName = this.name + ' ' + innerName
+				},
+				addOuterName: function (outerName) {
+					console.log('addOuterName:')
+					this.fullName = outerName + ' ' + this.name
+				}
+			},
+			created: function () {
+				this.$on('add-inner-name', this.addInnerName)
+				this.$on('add-outer-name', this.addOuterName)
+			}
+		})
+
+		/**
+		 * 确保是在Vue 组件上调用该方法。
+		 * @param   eventName 
+		 * @param   args   
+		 */
+		var broadcast = function (eventName, args) {
+			this.$children.forEach(function (child) {
+				child.$emit.apply(child, [eventName].concat(args))
+				broadcast.apply(child, [eventName].concat(args))
+			})
+		}
+		var mixMethods = {
+			methods: {
+				broadcast: broadcast
+			}
+		}
+		/**
+		 * OuterFormLegend
+		 */
+		var OuterFormLegend = Vue.extend({
+			componentName: 'outer-form-legend',
+			components: {
+				midFormLegend: midFormLegend
+			},
+			template: `
+				<div class="component">
+					<fieldset>
+						<legend>Outer Component</legend>
+						<p ref="full">Full Name: {{fullName}}</p>
+						<label>First Name<input v-model="name" type="text" /></label>
+						<button>Dispatch</button>
+						<button @click="broadcastName">Broadcast</button>
+						<mid-form-legend ref="mid"></mid-form-legend>
+					</fieldset>
+				</div>
+			`,
+			data: function () {
+				return {
+					name: '',
+					fullName: ''
+				}
+			},
+			mixins: [mixMethods],
+			methods: {
+				broadcastName: function () {
+					this.broadcast('add-outer-name', this.name)
+				}
+			},
+			created: function () {
+				this.$on('add-inner-name', function (innerName) {
+					this.fullName = this.name + ' ' + innerName
+				})
+			}
+		})
+
+		var vm = new Vue({
+			el: '#app',
+			components: {
+				formLegend: OuterFormLegend
+			}
+		})
+	</script>
+</body>
+</html>
