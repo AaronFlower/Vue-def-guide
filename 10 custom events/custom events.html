@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Custom Events</title>
+	<script  src="../lib/js/vue-2.0.js"></script>
+	<style>
+		.example {
+			margin: 20px auto;
+			padding: 20px;
+			background: cornsilk;
+			border: 1px solid crimson;
+		}
+	</style>
+</head>
+<body>
+	<div class="example" id="app01">
+		<h3>父子通信：通过 v-on 绑定自定义事件</h3>
+		<p>{{total}}</p>
+		<counter @increment="incrementTotal"></counter>
+		<counter @increment="incrementTotal"></counter>
+	</div>
+
+	<div class="example" id="app02">
+		<h3>v-model: 语法糖示例</h3>
+		<fieldset>
+			<legend>v-model</legend>
+			<p>{{message}}</p>
+			Message: <input v-model="message" type="text">
+		</fieldset>
+		<fieldset>
+			<legend>v-bind 与 v-on 接合</legend>
+			<p>{{name}}</p>
+			Name: <input :value="name" @input="name = $event.target.value" type="text">
+		</fieldset>
+		<p>v-model 只是实现了 input 事件的语法糖。</p>
+	</div>
+	
+	<div class="example" id="app03">
+		<h3>自定义 input 事件来使用 v-model 通信</h3>
+		<ul>
+			<li>接受一个 value 属性</li>
+			<li>在有新的 value 时触发 input 事件</li>
+		</ul>
+		<p>{{message}}</p>
+		<my-input label="Message" v-model="message"></my-input>
+	</div>
+	<script>
+		var counter = Vue.extend({
+			template: '<button @click="increment">+</button>',
+			methods: {
+				increment: function () {
+					this.$emit('increment')
+				}
+			}
+		})
+		/**
+		 * 父子通信：通过 v-on 绑定自定义事件
+		 */
+		var vm01 = new Vue({
+			el: '#app01',
+			components: {
+				counter: counter
+			},
+			data: function () {
+				return {
+					total: 0
+				}
+			},
+			methods: {
+				incrementTotal: function () {
+					this.total ++
+				}
+			}
+		})
+		/**
+		 * v-model: 语法糖示例
+		 */
+		var vm02 = new Vue({
+			el: '#app02',
+			data: function () {
+				return {
+					message: 'Hello Message',
+					name: 'Eason'
+				}
+			}
+		})
+		/**
+		 * 自定义
+		 */
+		var myInput = Vue.extend({
+			template: `
+				<div class="form-group">
+				<label :for="randomId">{{label}}</label>
+				<input :id="randomId" :value="value" @input="onInput" type="text" />
+				</div>
+			`,
+			props: ['value', 'label'],
+			data: function () {
+				return {
+					randomId: 'input-' + Math.random()
+				}
+			},
+			methods: {
+				onInput: function () {
+					this.$emit('input', event.target.value)
+				}
+			}
+		})
+		var vm03 = new Vue({
+			el: '#app03',
+			components: {
+				myInput: myInput
+			},
+			data: function () {
+				return {
+					message: 'hello'
+				}
+			}
+		})
+	</script>
+</body>
+</html>

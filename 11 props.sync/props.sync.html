@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Props Sync</title>
+	<script src="../lib/js/vue-1.0.js"></script>
+	<style>
+		#app {
+			margin: 20px auto;
+		} 
+		fieldset {
+			margin: 20px;
+			background: cornsilk;
+		}
+	</style>
+</head>
+<body>
+	<div id="app">
+		<h3>数组和对象是按引用传递的，所以不需要用.sync 进行同步</h3>
+		<fieldset>
+			<legend>Parent Component</legend>
+			<p>{{info|json}}</p>
+			<h5>Computed Props</h5>
+			<p><span>{{ca}}</span> <span>{{cb}}</span></p>
+			<button @click="info.a='America'">Change</button>
+			<button @click="add">Add</button>
+			<button @click="reset">Reset</button>
+			<child-component :info="info"></child-component>
+		</fieldset>
+	</div>
+	<script>
+		var childComponent = Vue.extend({
+			template: `
+				<fieldset>
+					<legend>Child Component</legend>
+					<p>{{info|json}}</p>
+					<h5>Watched Props</h5>
+					<p><span>{{wa}}</span> <span>{{wb}}</span></p>
+					<button @click="info.a='Austrilia'">Change</button>
+					<button @click="add">Add</button>
+					<button @click="reset">Reset</button>
+				</fieldset>
+			`,
+			props: ['info'],
+			data: function () {
+				return {
+					wa: '',
+					wb: ''
+				}
+			},
+			methods: {
+				add: function () {
+					Vue.set(this.info, 'd', 'Dog')
+				},
+				reset: function () {
+					this.info = {
+						'k': 'keen',
+						'l': 'love'
+					}
+				}
+			},
+			watch: {
+				info: {
+					deep: true,
+					immediate: true,
+					handler: function (val) {
+						this.wa = val.a
+						this.wb = val.b
+					}
+				}
+			}
+		})
+		var vm = new Vue({
+			el: '#app',
+			components: {
+				childComponent: childComponent
+			},
+			data: function () {
+				return {
+					info: {
+						a: 'apple',
+						b: 'banana'
+					}
+				}
+			},
+			methods: {
+				add: function () {
+					Vue.set(this.info, 'c', 'Canada')
+				},
+				reset: function () {
+					this.info = {
+						x: 'Xms',
+						y: 'Yellow'
+					}
+				}
+			},
+			computed: {
+				ca: function () {
+					return this.info.a
+				},
+				cb: function () {
+					return this.info.b
+				}
+			}
+		})
+	</script>
+</body>
+</html>
