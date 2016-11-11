@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Render Function</title>
+	<script  src="../lib/js/vue-2.0.js"></script>
+</head>
+<body>
+	<div id="app">
+		<h3>Typical Implemention</h3>
+		<anchor-heading :level="l1">Test Anchor Heading 1</anchor-heading>
+		<anchor-heading :level="l5">Test Anchor Heading 5</anchor-heading>
+		<h3>Render Function Implemention</h3>
+		<render-anchor-heading :level="l1">Test Render Function 1</render-anchor-heading>
+		<render-anchor-heading :level="l3">Test Render Function 3</render-anchor-heading>
+	</div>
+	<div id="anchor-heading">
+		<div>
+			<div v-if="level === 1">
+				<h1><a href="#"><slot></slot></a></h1>
+			</div>
+			<div v-if="level === 2">
+				<h2><a href="#"><slot></slot></a></h2>
+			</div>
+			<div v-if="level === 3">
+				<h3><a href="#"><slot></slot></a></h3>
+			</div>
+			<div v-if="level === 4">
+				<h4><a href="#"><slot></slot></a></h4>
+			</div>
+			<div v-if="level === 5">
+				<h5><a href="#"><slot></slot></a></h5>
+			</div>
+			<div v-if="level === 6">
+				<h6><a href="#"><slot></slot></a></h6>
+			</div>
+			<div v-if="level === 7">
+				<h7><a href="#"><slot></slot></a></h7>
+			</div>
+		</div>
+	</div>
+	<script>
+		/**
+		 * 冗长的实现方式
+		 */
+		var anchorHeading = Vue.extend({
+			template: document.getElementById('anchor-heading'),
+			props: {
+				level: {
+					type: Number,
+					default: 1
+				}
+			}
+		})
+		/**
+		 * Render function implemention
+		 */
+		var getChildrenTextContent = function (children) {
+			return children.map(function (node) {
+				return node.children
+					? getChildrenTextContent(node.children)
+					: node.text
+			}).join('')
+		}
+		var renderAnchorHeading = Vue.extend({
+			render: function (createElement) {
+				var headingId = getChildrenTextContent(this.$slots.default)
+				  .toLowerCase()
+				  .replace(/\W+/g, '-')
+				  .replace(/(^\-|\-$)/g, '')
+
+				return createElement(
+					'h' + this.level,
+					[
+						createElement('a', {
+						  attrs: {
+						    name: headingId,
+						    href: '#' + headingId
+						  }
+						}, this.$slots.default)
+					]
+				)
+			},
+			props: {
+				level: {
+					type: Number,
+					default: 1
+				}
+			}
+		})
+
+		var vm = new Vue({
+			el: '#app',
+			components: {
+				anchorHeading: anchorHeading,
+				renderAnchorHeading: renderAnchorHeading
+			},
+			data: function () {
+				return {
+					l1: 1,
+					l2: 2,
+					l3: 3,
+					l4: 4,
+					l5: 5,
+					l6: 6,
+					l7: 7
+				}
+			}
+		})
+	</script>
+</body>
+</html>
