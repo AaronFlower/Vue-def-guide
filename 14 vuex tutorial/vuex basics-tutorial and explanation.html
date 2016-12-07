@@ -212,6 +212,7 @@
 				counter: 0,
 				song: 'Leave me alone!'
 			},
+			// 必须同步执行。
 			mutations: {
 				// 参数传入 state
 				INCREMENT (state) {
@@ -223,12 +224,31 @@
 				}
 			}
 		})
-
+		// 为了能够异常执行，我们通过Actions 来分发 mutations 的函数。这并不是多此一举，主要是用来突破 mutations 的只能同步执行的限制。
+		var increamentAsync = function ({dispatch}) {
+			console.log('increamentAsync....')
+			setTimeout(function () {
+				dispatch('INCREMENT')
+			}, 2000)
+		}
 		Vue.component('inc-button-04', {
-			template: '<button @click.prevent="activate">Increment</button>',
+			template: `<button @click="activate">Increment</button> | <button @click="selfActivateAync">Self-IncreamentAsync</button> | <button @click="increamentAsync">Vuex Actions</button>`,
 			methods: {
 				activate () {
 					_store.dispatch('INCREMENT')
+				},
+				// 你可能发现了 action 函数必须依赖 store 实例才能执行。从技术上讲，我们可以在组件的方法内部调用 action(this.$store) 来触发一个 action，但这样写起来有失优雅。
+				// 更好的做法是把 action 暴露到组件的方法中，便可以直接在模板中引用它。我们可以使用 vuex.actions 选项来这么做：
+				selfActivateAync () {
+					console.log('self increamentAsync!')
+					setTimeout(function () {
+						_store.dispatch('INCREMENT')
+					}, 2000)
+				}
+			},
+			vuex: {
+				actions: {
+					increamentAsync
 				}
 			}
 		})
@@ -242,15 +262,32 @@
 			}
 		})
 		Vue.component('inc-display-04', {
-			template: '<p>{{counter}}</p>',
+			template: '<p> counter:{{counter}} | _counter:{{_counter}} | s_counter:{{s_counter}}</p> ',
+			/**
+			 * 读取 Vuex 中的状态，我们可以通过 computed 或 vuex 中的 getters 来实现，
+			 * 但在 vuex getters 中不能使用，this。 而 computed 可以使用 this.
+			 */
 			computed: {
 				counter () {
 					return _store.state.counter
+				},
+				s_counter () {
+					return this.$store.state.counter
+				}
+			},
+			vuex: {
+				// Vuex 状态的 getters 内部其实就是计算属性，这就意味着你能够以响应式的方式（并且更高效）地计算派生属性。
+				// 由于 getters 不是一个纯函数，即不会依赖于 this. 所以我们的 getters 可以写一个单独的文件中，来供多个组件共享。
+				// getter 函数都是纯函数，被多个组件共享的 getter 被高效地缓存起来了：当依赖状态发生改变的时候，该 getter 也仅仅只重新计算一次，便可供所有组件使用。
+				getters: {
+					_counter: state => state.counter
 				}
 			}
 		})
-		new Vue({
-			el: '#app-solution-04'
+		var vm4 = new Vue({
+			el: '#app-solution-04',
+			// 把 store 对象提供给 “store” 选项，这可以把 store 的实例注入所有的子组件, 在子组件中就可以通过 this.$store 来访问 vuex 中的状态了。
+			store: _store
 		})
 
 
