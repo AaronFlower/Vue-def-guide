@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Vue Use Custom Plugin</title>
+	<script src="../lib/js/vue-1.0.js"></script>
+</head>
+<body>
+	<div id="app">
+		{{params|json}}
+		<ul>
+			<li>{{queryStr}}</li>
+			<li>{{queryCond}}</li>
+		</ul>
+	</div>
+	<script>
+		var VLib = {
+			serializeParams:function (params) {
+				let keys = Object.keys(params)
+				return keys.map(function (key) {
+					return key + '=' + params[key]
+				}).join('&')
+			},
+			install: function (Vue, options) {
+				Vue.prototype.serializeParams = this.serializeParams
+			}
+		}
+		Vue.use(VLib)
+
+		var vm = new Vue({
+			el: '#app',
+			data () {
+				return {
+					params: {
+						a: 'Apple',
+						b: 'Banana'
+					}
+				}
+			},
+			computed: {
+				queryStr: function () {
+					return this.serializeParams(this.params)
+				},
+				queryCond: function () {
+					return Vue.serializeParams(this.params)
+				}
+			}
+		})
+	</script>
+</body>
+</html>
