@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Vuex Basics: Tutorial and Explanation</title>
+	<script src="../lib/js/vuex.js"></script>
+	<script src="../lib/js/vue-1.0.js"></script>
+</head>
+<body>
+	<h1><a href="https://skyronic.com/blog/vuex-basics-tutorial">Vuex Basics: Tutorial and Explanation.</a></h1>
+	<div id="app-solution-00">
+		<h2>Want to communicate among components</h2>
+		<inc-button-00></inc-button-00>
+		<inc-display-00></inc-display-00>
+		<inc-display-00></inc-display-00>
+	</div>	
+
+	<div id="app-solution-01">
+		<h2>Solution 01: Event Broadcasts</h2>
+		<inc-button-01></inc-button-01>
+		<inc-display-01></inc-display-01>
+		<inc-display-01></inc-display-01>
+	</div>	
+
+	<div id="app-solution-02">
+		<h2>Solution 02: Shared state</h2>
+		<p>
+			Share state store in a common file whick has a state object to share. But in this example we use a plain object to 
+			illustrate the share state.
+		</p>
+		<inc-button-02></inc-button-02>
+		<inc-display-02></inc-display-02>
+		<inc-display-02></inc-display-02>
+	</div>
+
+	<div id="app-solution-03">
+		<h2>Solution 03: Shared state</h2>
+		<p>
+			Share state store in a common file whick has a state object to share. But in this example we use a plain object to 
+			illustrate the share state.
+		</p>
+		<p>We can write state change methods in the shared object.</p>
+		<inc-button-03></inc-button-03>
+		<reset-button-03></reset-button-03>
+		<inc-display-03></inc-display-03>
+		<inc-display-03></inc-display-03>
+	</div>	
+
+	<div id="app-solution-04">
+		<h2>Solution 04: Vuex</h2>
+		<inc-button-04></inc-button-04>
+		<reset-button-04></reset-button-04>
+		<inc-display-04></inc-display-04>
+		<inc-display-04></inc-display-04>
+	</div>
+
+	<script>
+		/**
+		 * Solution 00: Want to communicate among components
+		 */
+		Vue.component('inc-button-00', {
+			template: '<button @click.prevent="activate">Increment</button>',
+			methods: {
+				activate () {
+					console.log('+1 ...')
+				}
+			}
+		})
+		Vue.component('inc-display-00', {
+			template: '<p>{{counter}}</p>',
+			data () {
+				return {
+					counter: 0
+				}
+			}
+		})
+		new Vue({
+			el: '#app-solution-00'
+		})
+
+		/**
+		 * Solution 01: Event Broadcasts
+		 */
+		Vue.component('inc-button-01', {
+			template: '<button @click.prevent="activate">Increment</button>',
+			methods: {
+				activate () {
+					console.log('+1 ...')
+					this.$dispatch('increment-pressed')
+				}
+			}
+		})
+		Vue.component('inc-display-01', {
+			template: '<p>{{counter}}</p>',
+			data () {
+				return {
+					counter: 0
+				}
+			},
+			events: {
+				increment () {
+					this.counter ++
+				}
+			}
+		})
+		new Vue({
+			el: '#app-solution-01',
+			events: {
+				'increment-pressed' () {
+					this.$broadcast('increment')
+				}
+			}
+		})
+
+		/**
+		 * Solution 02: Share state 
+		 */
+		// Object has the same reference.
+		var store = {
+			state: {
+				counter: 0
+			}
+		}
+		// Rember: Vue makes data reactive. 
+		Vue.component('inc-button-02', {
+			template: '<button @click.prevent="activate">Increment</button>',
+			methods: {
+				activate () {
+					console.log('+1 ...')
+					this.shareState.counter ++
+				}
+			},
+			data () {
+				return {
+					// Remeber : Since shareState's part of data vue makes store.state reactive. 
+					shareState: store.state
+				}
+			}
+		})
+		Vue.component('inc-display-02', {
+			template: '<p>{{shareState.counter}}</p>',
+			data () {
+				return {
+					shareState: store.state
+				}
+			}
+		})
+		new Vue({
+			el: '#app-solution-02'
+		})
+
+		/**
+		 * Solution 03: Share state (a better version.)
+		 * We can write state change methods in the shared object.
+		 */
+		// Object has the same reference.
+		var store = {
+			state: {
+				counter: 0
+			},
+			increment: function () {
+				if (this.state.counter < 10) {
+					this.state.counter ++
+				}
+			},
+			reset: function () {
+				this.state.counter = 0
+			}
+		}
+		// Rember: Vue makes data reactive. 
+		Vue.component('inc-button-03', {
+			template: '<button @click.prevent="activate">Increment</button>',
+			methods: {
+				activate () {
+					console.log('+1 ...')
+					store.increment()
+				}
+			},
+			data () {
+				return {
+					// Remeber : Since shareState's part of data vue makes store.state reactive. 
+					shareState: store.state
+				}
+			}
+		})
+		Vue.component('reset-button-03', {
+			template: '<button @click="reset">Reset</button>',
+			methods: {
+				reset () {
+					store.reset()
+				}
+			}
+		})
+		Vue.component('inc-display-03', {
+			template: '<p>{{shareState.counter}}</p>',
+			data () {
+				return {
+					shareState: store.state
+				}
+			}
+		})
+		new Vue({
+			el: '#app-solution-03'
+		})
+
+		/**
+		 * Solution 04: Vuex 
+		 */
+		Vue.use(Vuex)
+		var _store = new Vuex.Store({
+			state: {
+				counter: 0,
+				song: 'Leave me alone!'
+			},
+			mutations: {
+				// 参数传入 state
+				INCREMENT (state) {
+					console.log(JSON.stringify(state))
+					state.counter < 10 && state.counter ++
+				},
+				RESET (state) {
+					state.counter = 0
+				}
+			}
+		})
+
+		Vue.component('inc-button-04', {
+			template: '<button @click.prevent="activate">Increment</button>',
+			methods: {
+				activate () {
+					_store.dispatch('INCREMENT')
+				}
+			}
+		})
+
+		Vue.component('reset-button-04', {
+			template: '<button @click="reset">Reset</button>',
+			methods: {
+				reset () {
+					_store.dispatch('RESET')
+				}
+			}
+		})
+		Vue.component('inc-display-04', {
+			template: '<p>{{counter}}</p>',
+			computed: {
+				counter () {
+					return _store.state.counter
+				}
+			}
+		})
+		new Vue({
+			el: '#app-solution-04'
+		})
+
+
+
+	</script>
+</body>
+</html>
