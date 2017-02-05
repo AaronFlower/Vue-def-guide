@@ -6,6 +6,11 @@
 	<script  src="../lib/js/vue-2.0.js"></script>
 </head>
 <body>
+	<h1>Programmatically Javascript</h1>
+	<h2>Render 1</h2>
+	<p>
+		有时候，我们确实需要用 JS 来创建 HTML 标签及内容。这时可以用 Vue 提供的 render 函数来实现。
+	</p>
 	<div id="app">
 		<h3>Typical Implemention</h3>
 		<anchor-heading :level="l1">Test Anchor Heading 1</anchor-heading>
@@ -14,30 +19,33 @@
 		<render-anchor-heading :level="l1">Test Render Function 1</render-anchor-heading>
 		<render-anchor-heading :level="l3">Test Render Function 3</render-anchor-heading>
 	</div>
+	<!-- Typical Implemention template -->
+	<!-- 可以看出对于这种重复性的组件 template， 确实有点繁琐。 -->
 	<div id="anchor-heading">
 		<div>
 			<div v-if="level === 1">
-				<h1><a href="#"><slot></slot></a></h1>
+				<h1><slot></slot></h1>
 			</div>
 			<div v-if="level === 2">
-				<h2><a href="#"><slot></slot></a></h2>
+				<h2><slot></slot></h2>
 			</div>
 			<div v-if="level === 3">
-				<h3><a href="#"><slot></slot></a></h3>
+				<h3><slot></slot></h3>
 			</div>
 			<div v-if="level === 4">
-				<h4><a href="#"><slot></slot></a></h4>
+				<h4><slot></slot></h4>
 			</div>
 			<div v-if="level === 5">
-				<h5><a href="#"><slot></slot></a></h5>
+				<h5><slot></slot></h5>
 			</div>
 			<div v-if="level === 6">
-				<h6><a href="#"><slot></slot></a></h6>
+				<h6><slot></slot></h6>
 			</div>
 			<div v-if="level === 7">
-				<h7><a href="#"><slot></slot></a></h7>
+				<h7><slot></slot></h7>
 			</div>
 		</div>
+	</div>	
 	</div>
 	<script>
 		/**
@@ -55,30 +63,11 @@
 		/**
 		 * Render function implemention
 		 */
-		var getChildrenTextContent = function (children) {
-			return children.map(function (node) {
-				return node.children
-					? getChildrenTextContent(node.children)
-					: node.text
-			}).join('')
-		}
 		var renderAnchorHeading = Vue.extend({
 			render: function (createElement) {
-				var headingId = getChildrenTextContent(this.$slots.default)
-				  .toLowerCase()
-				  .replace(/\W+/g, '-')
-				  .replace(/(^\-|\-$)/g, '')
-
 				return createElement(
-					'h' + this.level,
-					[
-						createElement('a', {
-						  attrs: {
-						    name: headingId,
-						    href: '#' + headingId
-						  }
-						}, this.$slots.default)
-					]
+					'h' + this.level, 		// html tag
+					this.$slots.default 	// 子组件中的阵列。
 				)
 			},
 			props: {
