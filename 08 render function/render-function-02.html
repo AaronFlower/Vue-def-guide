@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Render Function</title>
+	<style>
+		.render-header {
+			color: deepskyblue;
+			cursor: pointer;
+		}
+	</style>
+	<script  src="../lib/js/vue-2.0.js"></script>
+</head>
+<body>
+	<h1>Programmatically Javascript</h1>
+	<h2>Render 1</h2>
+	<p>
+		有时候，我们确实需要用 JS 来创建 HTML 标签及内容。这时可以用 Vue 提供的 render 函数来实现。
+	</p>
+	<p>
+		在使用 render 函数之前，最好对 Vue 的 vm 实例所具有属性有所下面内容。特别是vm 实例的 <a href="https://cn.vuejs.org/v2/api/#vm-slots">$slots</a> 属性。
+	</p>
+	<ol>
+		<li>createElement 函数</li>
+		<li></li>
+		<li></li>
+		<li></li>
+		<li></li>
+	</ol>
+	<h3>createEelment 函数</h3>
+	<p>
+		createElement(param1, param2, param3)接收三个参数。
+		<pre>
+			param1: Type, {String | Object | Function};  An HTML tag name, component options, or function  returning one of these. 	Required.
+			param2: Type, {Object}; A data object corresponding to the attributes you would use in a template. Optional.
+			param3: Type, {String | Array} 	 Children VNodes. Optional.
+			createElement( 
+				param1, 	// html 
+				param2,
+				param3
+			)
+		</pre>
+		第一个参数指定根标签。
+		第二个参数主要用于指定，所创建组件元素的 dom 元素信息，如： class, attributes, style, 事件，指令等。即用第二个参数 data object 来完成对在 template 中通过标签书写内容的替换。
+	</p>
+	<div id="app">
+		<h3>Typical Implemention</h3>
+		<anchor-heading :level="l1">Test Anchor Heading 1 <p>slot 中header标签包含 p 标签。</p></anchor-heading>
+		<anchor-heading :level="l5">Test Anchor Heading 5</anchor-heading>
+		<h3>Render Function Implemention</h3>
+		<render-anchor-heading :level="l1">Test Render Function 1</render-anchor-heading>
+		<render-anchor-heading :level="l3">Test Render Function 3 <p>slot 中header标签包含 p 标签。</p></render-anchor-heading>
+	</div>
+	<!-- Typical Implemention template -->
+	<!-- 可以看出对于这种重复性的组件 template， 确实有点繁琐。 -->
+	<div id="anchor-heading">
+		<div>
+			<div v-if="level === 1">
+				<h1><slot></slot></h1>
+			</div>
+			<div v-if="level === 2">
+				<h2><slot></slot></h2>
+			</div>
+			<div v-if="level === 3">
+				<h3><slot></slot></h3>
+			</div>
+			<div v-if="level === 4">
+				<h4><slot></slot></h4>
+			</div>
+			<div v-if="level === 5">
+				<h5><slot></slot></h5>
+			</div>
+			<div v-if="level === 6">
+				<h6><slot></slot></h6>
+			</div>
+			<div v-if="level === 7">
+				<h7><slot></slot></h7>
+			</div>
+		</div>
+	</div>	
+	</div>
+	<script>
+		/**
+		 * 冗长的实现方式
+		 */
+		var anchorHeading = Vue.extend({
+			template: document.getElementById('anchor-heading'),
+			props: {
+				level: {
+					type: Number,
+					default: 1
+				}
+			}
+		})
+		/**
+		 * Render function implemention
+		 */
+		var renderAnchorHeading = Vue.extend({
+			render: function (createElement) {
+				var _self = this
+				var getSlotTextContent = function () {
+					console.log(_self.$slots.default)
+				}
+				getSlotTextContent()
+				return createElement(
+					'h' + this.level, 		// 第一个参数, param1, html tag,
+					{
+						class: [
+							'render-header',
+							{
+								isEven: true
+							}
+						],
+						attrs: {
+							'data-header-id': 'foo'
+						},
+						on: {
+							hover () {
+								console.log('hover...', this)
+							},
+							click () {
+								console.log('click...', this)
+							}
+						}
+					},
+					[this.$slots.default] 	// 子组件中的阵列。
+				)
+			},
+			props: {
+				level: {
+					type: Number,
+					default: 1
+				}
+			}
+		})
+
+		var vm = new Vue({
+			el: '#app',
+			components: {
+				anchorHeading: anchorHeading,
+				renderAnchorHeading: renderAnchorHeading
+			},
+			data: function () {
+				return {
+					l1: 1,
+					l2: 2,
+					l3: 3,
+					l4: 4,
+					l5: 5,
+					l6: 6,
+					l7: 7
+				}
+			}
+		})
+	</script>
+</body>
+</html>
