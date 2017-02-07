@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Transition Effects</title>
+	<script  src="../lib/js/vue-2.0.js"></script>
+	<style>
+		.fade-enter-active, .fade-leave-active {
+			transition: opacity 2s;
+		}
+		.fade-enter, .fade-leave-active {
+			opacity: 0;
+		}
+		.circle	{
+			border: 1px solid red;
+			border-radius: 50%;
+			width: 50px;
+			height: 50px;
+			background:  #1EC6A4;
+		}
+
+		.transition-foo-enter {
+			background: #1EC6A4;
+		}
+		.transition-foo-enter-active {
+			transition: all 1s;
+			background: #E900F1;
+		}
+		.transition-foo-leave-active {
+			transition: all 1s;
+			background: #E5E535;	
+		}
+
+	</style>
+</head>
+<body>
+	<div id="app">
+		<h3>Vue.2.0 提供封装的 transition 属性</h3>
+		<button @click="show = !show">Toggle</button>
+		<transition name="fade">
+			<div>
+				<p v-if="show">Hello</p>
+				<p ref="myKid">myKids</p>
+			</div>
+		</transition>
+		<button @click="showCircle = !showCircle">Toggle Circle</button>
+		<transition name="transition-foo">
+			<div v-if="showCircle" class="circle"></div>
+		</transition>
+		<h3>Fade Use Functional Component</h3>
+		<fade>
+			<div v-if="showCircle" class="circle"></div>
+		</fade>
+	</div>
+	<script>
+		Vue.component('fade', {
+			functional: true,
+			render: function (createEelment, context) {
+				console.log('fade:', context)
+				return createEelment('transition', {
+					attrs: {
+						name: 'transition-foo'
+					},
+					on: {
+						beforeEnter () {
+							console.log('transition... beforeEnter...')
+						},
+						afterEnter () {
+							console.log('transition... afterEnter...')
+						}
+					}
+				}, context.children)
+			}
+		})
+		var vm = new Vue({
+			el: '#app',
+			data: {
+				show: true,
+				showCircle: true
+			}
+		})
+	</script>
+</body>
+</html>
