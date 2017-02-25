@@ -4,6 +4,7 @@
 	<meta charset="UTF-8">
 	<title>Transition Effects</title>
 	<script  src="../lib/js/vue-1.0.js"></script>
+	<script src="../lib/js/vue-animated-list.js"></script>
 	<style>
 		/**
 		 * 最终展示状态，即“有”状态。
@@ -87,6 +88,64 @@
 		    transform: scale(0);
 		  }
 		}
+
+		/**
+		 * delete item
+		 */
+		@keyframes delete-item {
+			0% {
+				opacity: 1;
+				text-decoration: line-through;
+				color: green;
+			}
+			100% {
+				opacity: 0;
+				color: white;
+				text-decoration: line-through;
+			}
+		}
+
+		@keyframes add-item {
+			from {
+				opacity: 0;
+				color: blue;
+				text-decoration: underline;
+			}
+			to {
+				opacity: 1;
+				text-decoration: none;
+			}
+		}
+
+		/**
+		 * 
+		 */
+		.item-move {
+		  /* applied to the element when moving */
+		  transition: transform .5s cubic-bezier(.55,0,.1,1);
+		}
+		.item-transition {
+			opacity: 1;
+			/*transition: all;*/
+			/*transition: opacity 2s, color 1s;*/
+		}
+/*		.item-transition {
+			animation: bounce-in .5s;
+		}*/
+		.item-enter {
+			/*animation: bounce-out .5s;*/
+/*			color: #0A00FB;
+			opacity: 0;
+			text-decoration: underline;*/
+			animation: add-item 1s;
+		}
+		.item-leave {
+			animation: delete-item 1s;
+/*			animation: bounce-out .5s;
+			opacity: 0.2;
+			color: green;
+			text-decoration: line-through;*/
+		}
 	</style>
 </head>
 <body>
@@ -100,6 +159,18 @@
 		<p>
 			<span v-if="bounceShow" transition="bounce">Look At Me!</span>
 		</p>
+		<h3>Transition List</h3>
+		<div class="btn-groups">
+			<button @click="items.push({value: items.length, text: 'Item 0' + items.length + 1})">Add</button>
+			<button @click="items.splice(items.length * Math.random(), 1)">Remvoe</button>
+			<button @click="items.reverse()">Reverse</button>
+			<button @click="shuffle">Shuffle</button>
+		</div>
+		<ul>
+			<li v-for="item in items" transition="item">
+				{{item.text}}
+			</li>
+		</ul>
 	</div>
 	<script>
 		Vue.transition('transition-foo', {
@@ -133,7 +204,28 @@
 			data: {
 				show: true,
 				showCircle: true,
-				bounceShow: true
+				bounceShow: true,
+				items: [
+					{value: '1', text: 'Item 01'},
+					{value: '2', text: 'Item 02'},
+					{value: '4', text: 'Item 03'},
+					{value: '0', text: 'Item 04'}
+				]
+			},
+			methods: {
+				shuffle: function () {
+					let len = this.items.length
+					for (var i = len-1; i >= 0; i--) {
+						let index = parseInt(Math.random() * len)
+						if (index === i) {
+							continue
+						}
+						let tmp0 = this.items[index]
+						let tmp1 = this.items[i]
+						this.items.splice(index, 1, tmp1)
+						this.items.splice(i, 1, tmp0)
+					}
+				}
 			}
 		})
 	</script>
