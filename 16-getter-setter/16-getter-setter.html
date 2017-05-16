@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Getter and Setter</title>
+	<script src="../lib/js/vue-2.0.js"></script>
+</head>
+<body>
+	
+	<div id="app">
+		<p>{{number}}</p>
+		<number-input v-model="number"></number-input>
+	</div>
+
+	<script>
+		Vue.component('number-input', {
+			template: `
+				<div>
+					<p>value: {{value}}</p>
+					<input type="text" v-model="model">
+				</div>
+			`,
+			data () {
+				return {
+					value: 100
+				}
+			},
+			computed: {
+				model: {
+					/**
+					 * model 依赖于 value。 默认一般形式就只是 get 方法。即：
+					 * model () {
+					 *  return '￥' + this.value
+					 * }，
+					 * 但当，设置 model 了变化时，this.value 也应该随之变化，如这里的 model 通过 input 方法变化，会同步更新到 this.value 上。
+					 */
+					get () {
+						console.log('get value change...', '￥' + this.value)
+						return '￥' + this.value
+					},
+					set (value) {
+						console.log('set value', value)
+						this.value = value.substr(1)
+					}
+				}
+			}
+		})
+
+		var $vm0 = new Vue({
+			el: '#app',
+			data: {
+				number: 100
+			}
+		})
+
+	</script>
+</body>
+</html>
