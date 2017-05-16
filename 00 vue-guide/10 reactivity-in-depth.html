@@ -54,9 +54,13 @@
 	<h4>Reactivity In Depth 02</h4>
 	<h5>Test vm instance $vm.nextTick() method</h5>
 	<div id="app01">
-		{{msg}}
+		<div>{{msg}}</div> 
 		<button class="switch">Switch</button>
 		<button id="update-msg" @click="updateMsg">this.$nextTick()</button>
+	</div>
+	<div id="app03">
+		{{seconds}}
+		<button @click="increment">Add 10s</button>
 	</div>
 	<script>	
 		var vm02 = new Vue({
@@ -67,13 +71,53 @@
 			methods: {
 				updateMsg: function () {
 					this.msg = 'Update!'
-					console.log(this.msg)
-					console.log(this.$el.textContent)
-					// this.$nextTick(function () {
-					// 	console.log(this.msg)
-					// 	console.log(this.$el.textContent)
-					// })
+					console.log('Detect dom change immediately')
+					console.log('\t this.msg: ', this.msg)
+					console.log('\t this.$el.children[0].textContent: ',   this.$el.children[0].textContent)
+					console.log('\t this.msg ===  this.$el.children[0].textContent: ', this.msg === this.$el.children[0].textContent)
+					// 上面的语句是对 this.msg 进行更新，理应数据变化后 DOMD 应该及时更新，但是 Vue 的渲染机制使用的是异步机制(asynchronously)。 
+					// 如果一个数据发生了变化，会新建一个队列把数据所有的变化按事件循环同样的顺序缓冲到这个队列中。如果同一个数据的 watcher 在这一个队列中被触发多次，
+					// 则只会把最后一次的值推送到队列中。在对 DOM 进行操作进，Buffer 去重很重要可以减少不必要的计算和 DOM 操作。
+					// 然后在下一个事件循环时钟 tick 到来, Vue 将刷新队列，并执行已经去重后的更新和计算。
+					// 在内部 Vue 会使用 Promise.then, Dom 的 MutationObserver , 或最后的 setTimeout(fn, 0) 来完成该操作。
+					// 
+					// 所以 this.msg = 'Update', Vue 并没有立即去更新渲染 DOM， 而是在下一个新的时候时钟 tick 出现时才会去刷新队列。所以我们 DOM 检测要在 nextTick 中进行。
+					this.$nextTick(function () {
+						console.log('Detect dom change in next tick!')
+						console.log('\t this.msg: ', this.msg)
+						console.log('\t this.$el.children[0].textContent: ',  this.$el.children[0].textContent)
+						console.log('\t this.msg ===  this.$el.children[0].textContent: ', this.msg === this.$el.children[0].textContent)
+					})
 				}
+			}
+		})
+		var vm03 = new Vue({
+			el: '#app03',
+			data: function () {
+				return {
+					seconds: 0
+				}
+			},
+			methods: {
+				increment: function () {
+					var _self = this
+					this.$nextTick(function () {
+						console.log('dom is changed:', this.seconds)
+					})
+					for (var i = 10; i >= 0; i--) {
+						_self.seconds ++
+					}					
+				}
+			},
+			watch: {
+				seconds: function (val) {
+					console.log('seconds:', val)
+				}
+			},
+			created: function () {
+				this.$nextTick(function () {
+					console.log('dom is changed:', this.seconds)
+				})
 			}
 		})
 	</script>
