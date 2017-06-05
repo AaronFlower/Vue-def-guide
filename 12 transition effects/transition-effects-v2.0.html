@@ -93,6 +93,13 @@
 		.list-enter-active, .list-leave-active {
 			transition: all 0.3s;
 		}
+
+		/**
+		 * Demo-9 
+		 */
+		.flip-list-move {
+		  transition: transform 1s;
+		}
 	</style>
 </head>
 <body>
@@ -242,6 +249,16 @@
 				<span class="list-item" v-for="item in items" :key="item">{{item}}</span>
 			</transition-group>
 		</div>
+
+		<p>
+			Demo-9: transition-group list
+		</p>
+		<button @click="shuffle">Shuffle</button>
+		<div>
+			<transition-group name="flip-list" tag="ul">
+				<li v-for="item in items2" :key="item">{{item}}</li>
+			</transition-group>		
+		</div>
 	</div>
 	<script>
 		var vm = new Vue({
@@ -270,7 +287,9 @@
 				componentView: 'v-a',
 
 				items: Array.from({length: 10}).map((_, i) => i),
-				nextNumber: 10
+				nextNumber: 10,
+
+				items2: Array.from({length: 10}).map((_, i) => i)
 			},
 			methods: {
 				add () {
@@ -281,6 +300,18 @@
 					if (this.items.length) {
 						let index = Number.parseInt(Math.random() * this.items.length)
 						this.items.splice(index, 1)
+					}
+				},
+				shuffle () {
+					let len = this.items2.length
+					for (let i = len - 1; i >= 0; i--) {
+						let randomIndex = Number.parseInt(Math.random() * len)
+						if (randomIndex === i) {
+							continue
+						}
+						let tmp = this.items2[i]
+						this.items2.splice(i, 1, this.items2[randomIndex])
+						this.items2.splice(randomIndex, 1, tmp)
 					}
 				}
 			}
