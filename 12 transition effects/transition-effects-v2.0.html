@@ -4,12 +4,18 @@
 	<meta charset="UTF-8">
 	<title>Transition Effects</title>
 	<script  src="../lib/js/vue-2.0.js"></script>
+	<link rel="stylesheet" href="../lib/css/animate.css">
 	<style>
+		body {
+			width: 80%;
+			margin: auto;
+			margin-bottom: 200px;
+		}
 		.fade-enter-active, .fade-leave-active {
-			transition: opacity 2s;
+		  transition: opacity .5s
 		}
 		.fade-enter, .fade-leave-active {
-			opacity: 0;
+		  opacity: 0
 		}
 		.circle	{
 			border: 1px solid red;
@@ -30,30 +36,253 @@
 			transition: all 1s;
 			background: #E5E535;	
 		}
+		/**
+		 * Demo-3 CSS 过渡
+		 */
+		/* 从无到有 */
+		.slide-fade-enter {
+			transform: translateX(10px);
+			opacity: 0;
+			color: cyan;
+		}
+		.slide-fade-enter-active {
+			transition: all 0.3s;
+		}
 
+		/* 从有到无 */
+		.slide-fade-leave-active {
+			transform: translateX(10px);
+			color: red;
+			opacity: 0;
+		}
+		.slide-fade-leave-active {
+			transition: all 0.5s cubic-bezier(1.0, 0.5, 0.8, 1.0);;
+		}
+
+		/**
+		 * Demo-4 CSS 动画
+		 */
+		.bounce-enter-active {
+			animation: bounceIn .5s;
+		}
+		.bounce-leave-active {
+			animation: bounceOut .5s;
+		}
+
+		/**
+		 * Demo-7 
+		 */
+		.component-fade-enter-active, .component-fade-leave-active {
+		  transition: opacity .3s ease;
+		}
+		.component-fade-enter, .component-fade-leave-active {
+		  opacity: 0;
+		}
+
+		/**
+		 * Demo-8
+		 */
+		.list-item {
+			display: inline-block;
+			margin: 10px;
+		}
+		.list-enter, .list-leave-active {
+			opacity: 0;
+			transform: translateY(30px);
+		}
+		.list-enter-active, .list-leave-active {
+			transition: all 0.3s;
+		}
 	</style>
 </head>
 <body>
 	<div id="app">
+		<h2>Transition</h2>
+		<hr>
 		<h3>Vue.2.0 提供封装的 transition 属性</h3>
-		<button @click="show = !show">Toggle</button>
+		<p>
+			transition 直接应用子级元素 transition name="fade" 子素材并且是根元素
+		</p>
+		<button @click="directRootShow = !directRootShow">Toggle</button>
+		<transition name="fade">
+			<p v-if="directRootShow">Hello</p>
+		</transition>
+
+		<button @click="directNonrootShwo = !directNonrootShwo">Toggle</button>
+		<transition name="fade">
+			<p v-if="directNonrootShwo">Hello</p>
+			<p ref="myKid">myKids</p>
+		</transition>
+	
+		<p>
+			transtion 直接子元素被包裹一层 div 是无效的，因为包裹的容器元素并没有消失。
+		</p>
+		<button @click="indirectShow = !indirectShow">Toggle</button>
 		<transition name="fade">
 			<div>
-				<p v-if="show">Hello</p>
+				<p v-if="indirectShow">Hello</p>
 				<p ref="myKid">myKids</p>
 			</div>
 		</transition>
+
 		<button @click="showCircle = !showCircle">Toggle Circle</button>
 		<transition name="transition-foo">
 			<div v-if="showCircle" class="circle"></div>
 		</transition>
+
+		<h3>Demo-3:  CSS 过渡</h3>
+		<div class="demo">
+			<button @click="slideShow = !slideShow">Toggle</button>
+			<transition name="slide-fade">
+				<p v-if="slideShow">Slide Demo</p>
+			</transition>
+		</div>
+		<h3>Demo-4: CSS 动画</h3>
+		<p>CSS 动画用法同 CSS 过渡，区别是在动画中 v-enter 类名在节点插入 DOM 后不会立即删除，而是在 animationend 事件触发时删除。</p>
+		<button @click="bounceShow = !bounceShow">Toggle</button>
+		<transition name="bounce">
+			<p v-if="bounceShow">Look at me!</p>
+		</transition>
+
+		<h3>Demo-5: 自定义过渡类名</h3>
+		<p>
+			我们可以通过以下特性来自定义过渡类名, 这样我们就可以不用自己写过渡样式了。可以直接应用第三方的动画库，如 animate.css。
+			我们可以通过以下特性来自定义过渡类名：
+			<ul>
+				<li> enter-class </li>
+				<li> enter-active-class </li>
+				<li> leave-class </li>
+				<li> leave-active-class </li>
+			</ul>
+			他们的优先级高于普通的类名.
+		</p>
+		<button @click="customShow = !customShow">Toggle</button>
+		<transition 
+			enter-active-class="animated tada"
+			leave-active-class="animated bounceOutRight"
+		>
+			<p v-if="customShow">Look at me!</p>
+		</transition>
+		<button @click="appearShow = !appearShow">Toggle</button>
+		<transition appear>
+			<p v-if="appearShow">Appear Show!</p>
+		</transition>
+		<h3>Demo 6: 多元素切换最好指定 key</h3>
+		<p>
+			当有相同标签名的元素切换时，需要通过 key 特性设置唯一的值来标记以让 Vue 区分它们，否则 Vue 为了效率只会替换相同标签内部的内容。即使在技术上没有必要，给在 transition 组件中的多个元素设置 key 是一个更好的实践。
+		</p>
+		<p>
+			如果不指定 key 的话， 如下过渡是不会起作用的。
+		</p>
+		<button @click="keyShow = !keyShow">Toggle Key Show</button>
+		<p>
+			<transition name="slide-fade">
+				<button v-if="keyShow" >Create</button>
+				<button v-else >Edited</button>
+			</transition>
+		</p>
+		<p>
+			但是即使指定 key 过渡也是很怪的。这是 transition 的默认行为 - 进入和离开同时发生。如下：
+		</p>
+		<p>
+			<button @click="withoutModeShow = !withoutModeShow">Toggle Key Show</button>
+			<transition name="slide-fade">
+				<button v-if="withoutModeShow" key="create">Create</button>
+				<button v-else key="edited">Edited</button>
+			</transition>
+		</p>
+		<p>
+			然后，我们加上 translate 让它们运动像滑动过渡(out-in)：
+		</p>
+		<p>
+			<button @click="outinModeShow = !outinModeShow">Toggle Key Show</button>
+			<transition name="slide-fade" mode="out-in">
+				<button v-if="outinModeShow" key="create">Create</button>
+				<button v-else key="edited">Edited</button>
+			</transition>
+		</p>
+		<p>
+			然后，我们加上 translate 让它们运动像滑动过渡(in-out)：
+		</p>
+		<p>
+			<button @click="inoutModeShow = !inoutModeShow">Toggle Key Show</button>
+			<transition name="slide-fade" mode="in-out">
+				<button v-if="inoutModeShow" key="create">Create</button>
+				<button v-else key="edited">Edited</button>
+			</transition>
+		</p>
+		<h3>Demo-7: 多个组件过渡</h3>
+		<p>
+			多个组件的过渡简单很多 - 我们不需要使用 key 特性。相反，我们只需要使用动态组件就可以了。
+			注意加上 tranlste mode。而且还使用了 appear 特性。
+		</p>
+		<label><input type="radio" name="component" value="v-a" @click="componentView='v-a'">A</label>
+		<label><input type="radio" name="component" value="v-b" @click="componentView='v-b'">B</label>
+		<p>
+			<transition name="component-fade" mode="out-in" appear>
+				<component :is="componentView"></component>
+			</transition>
+		</p>
+		<hr>
+		<h2>Transition-group</h2>
+		<p>
+			那么怎么同时渲染整个列表，比如使用 v-for ？在这种场景中，使用 transition-group 组件。在我们深入例子之前，先了解关于这个组件的几个特点：
+			<ul>
+				<li>不同于 transition， 它会以一个真实元素呈现：默认为一个 span。你也可以通过 tag 特性更换为其他元素。</li>
+				<li>内部元素 总是需要 提供唯一的 key 属性值</li>
+			</ul>
+		</p>
+		<p>
+			Demo-8: transition-group list
+		</p>
+		<button @click="add">Add</button>
+		<button @click="remove">Remove</button>
+		<div>
+			<transition-group name="list" tag="p">
+				<span class="list-item" v-for="item in items" :key="item">{{item}}</span>
+			</transition-group>
+		</div>
 	</div>
 	<script>
 		var vm = new Vue({
 			el: '#app',
+			components: {
+				'v-a': {
+					template: '<div>Dynamic Component A Foo</div>'
+				},				
+				'v-b': {
+					template: '<div>Dynamic Component B Bar</div>'
+				},
+			},
 			data: {
-				show: true,
-				showCircle: true
+				directRootShow: true,
+				directNonrootShwo: true,
+				indirectShow: true,
+				showCircle: true,
+				slideShow: true,
+				bounceShow: true,
+				customShow: true,
+				appearShow: true,
+				keyShow: true,
+				withoutModeShow: true,
+				outinModeShow: true,
+				inoutModeShow: true,
+				componentView: 'v-a',
+
+				items: Array.from({length: 10}).map((_, i) => i),
+				nextNumber: 10
+			},
+			methods: {
+				add () {
+					let index = 0 + Number.parseInt(Math.random() * this.items.length)
+					this.items.splice(index, 0, this.nextNumber ++)
+				},
+				remove () {
+					if (this.items.length) {
+						let index = Number.parseInt(Math.random() * this.items.length)
+						this.items.splice(index, 1)
+					}
+				}
 			}
 		})
 	</script>
