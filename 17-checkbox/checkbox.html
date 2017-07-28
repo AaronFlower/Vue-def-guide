@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Checkbox</title>
+	<script src="../lib/js/vue-2.0.js"></script>
+</head>
+<body>
+	<p>
+		对于 <code><input type="checkbox"></code> , 其值是在  checkbox.value 上的，默认是 「on」；
+		而判断是否选中用 checkbox.checked 来判断； 当然也可以用 checkbox.checked = true | false 来设置是事选中。
+		就是这么简单，在对 checkbox 进行封装时也不用那么复杂。
+	</p>
+	<div id="app">
+		<p>Kid: {{kid}}</p>
+		<Checkbox value="Apple" v-model="kid"
+		></Checkbox>
+	</div>
+
+	<script>
+		Vue.component('Checkbox', {
+			template: `
+				<div>
+					<p>value: {{value}}</p>
+					<p>model: {{checked}}</p>
+					<label><slot>{{value}}</slot>
+						<input type="checkbox" v-model="checked$" :value="value">
+					</label>
+				</div>
+			`,
+			props: {
+				value: {
+					type: String,
+					default: 'On'
+				},
+				checked: false
+			},
+			data () {
+				return {
+					// checked$: this.checked
+				}
+			},
+			computed: {
+				checked$: {
+					get ( ) {
+						console.log('Get value...')
+						return this.$checked
+					},
+					set (newValue, oldValue) {
+						console.log('Set value', newValue, oldValue)
+						this.$emit('input', newValue)
+						return newValue
+					}
+				}
+			}
+		})
+
+		var $vm0 = new Vue({
+			el: '#app',
+			data () {
+				return {
+					kid: true
+				}
+			}
+		})
+
+	</script>
+</body>
+</html>
