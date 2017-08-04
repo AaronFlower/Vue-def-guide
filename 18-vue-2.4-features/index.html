@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Vue 2.4</title>
+	<script src="https://unpkg.com/vue@2.4.2"></script>
+</head>
+<body>
+	<div id="app">
+		<parent :foo="foo" :bar="bar" :baz="baz" :qux="qux"></parent>
+	</div>
+
+	<script id="parent" type="text/template">
+		<div class="container">
+			{{foo}},{{bar}}, {{baz}}, {{qux}}
+			<child :foo="foo" :bar="bar" :baz="baz" :qux="qux" v-bind="$attrs"></child>
+		</div>	
+	</script>
+	<script id="child" type="text/template">
+		<div class="container">
+			child props: {{$attrs}}, {{foo}}
+			<grand-child v-bind="$attrs"></grand-child>
+		</div>	
+	</script>
+	<script id="grand-child" type="text/template">
+		<div class="container">
+			grand-child props: {{$attrs}}, {{bar}}
+		</div>
+	</script>
+	
+	<script>
+		
+	</script>
+	<script>
+		Vue.component('parent', {
+			template: document.getElementById('parent'),
+			props: ['foo', 'bar', 'baz', 'qux']
+		})
+
+		Vue.component('child', {
+			template: document.getElementById('child'),
+			inheritAttrs: false,
+			props: ['foo', 'bar', 'baz', 'qux']
+		})
+
+		Vue.component('grand-child', {
+			template: document.getElementById('grand-child'),
+			inheritAttrs: false,
+			props: ['foo', 'bar', 'baz', 'qux']
+		})
+
+		let $vm0 = new Vue({
+			el: '#app',
+			data () {
+				return {
+					foo: 'Foo',
+					bar: 'Bar',
+					baz: 'Baz',
+					qux: 'Qux'
+				}
+			}
+		})
+	</script>
+</body>
+</html>
